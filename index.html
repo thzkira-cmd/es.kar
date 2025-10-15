@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>es.kar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --font-family: 'Sniglet', cursive;
+            --font-weight-bold: 700;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; border: none; outline: none; }
+        body {
+            font-family: var(--font-family);
+            color: var(--primary-color);
+            background: url('sky.png') center/cover fixed;
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        body, html {
+            overflow: hidden !important;
+        }
+        .character {
+            position: fixed;
+            width: 250px;
+            height: auto;
+            z-index: 1;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+        .left-character { bottom: 20px; left: 20px; }
+        .right-character { top: 20px; right: 20px; }
+        #game-screen .character, #home-screen .character, #musics-screen .character { display: none; }
+        .screen {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            overflow: hidden !important;
+        }
+        #game-screen,
+        #menu-screen,
+        #home-screen,
+        #musics-screen,
+        .modal,
+        .modal-content,
+        .pic-modal-content,
+        .text-modal-content {
+            overflow: hidden !important;
+        }
+        .hidden { display: none !important; }
+        #menu-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            gap: 20px;
+        }
+        .sound-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 0, 0, 0.2) url('sound-on.png') center/cover no-repeat;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 20;
+            animation: rotate 20s linear infinite;
+        }
+        .sound-button:hover {
+            transform: scale(1.1) rotate(10deg);
+            background: rgba(255, 0, 0, 0.4) url('sound-on.png') center/cover no-repeat;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        .sound-button.muted {
+            background: rgba(139, 0, 0, 0.5) url('sound-off.png') center/cover no-repeat;
+            animation: none;
+        }
+        .sound-button.muted:hover {
+            background: rgba(139, 0, 0, 0.7) url('sound-off.png') center/cover no-repeat;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .title-container { margin-bottom: 40px; }
+        .title-image {
+            display: block;
+            margin: 0 auto;
+            max-width: 70%;
+            height: auto;
+            filter: drop-shadow(2px 2px 4px rgba(255, 255, 255, 0.5));
+            transition: all 0.3s ease;
+        }
+        .play-button {
+            padding: 20px 40px;
+            font-size: 2em;
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            align-self: center;
+        }
+        .play-button:hover {
+            transform: scale(1.1);
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+        .play-button:active {
+            transform: scale(0.95);
+            color: #cc0000;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #game-screen {
+            height: 100vh;
+            justify-content: flex-start;
+            padding-top: 50px;
+        }
+        .game-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+            gap: 60px; /* espaço entre os valores */
+        }
+        #score, #timer {
+            text-align: center;
+            min-width: 100px;
+        }
+        .game-header h2, .game-header h3 {
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            color: var(--primary-color);
+        }
+     .game-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            cursor: pointer;
+            z-index: 15 !important;
+        }
+        .game-star {
+            position: absolute;
+            width: 100px;
+            height: 90px;
+            background: #ffd700 url('star.png') center/cover;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            opacity: 1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 15;
+            animation: fall 10s linear forwards;
+            pointer-events: auto;
+        }
+        .game-star:hover { transform: scale(1.2); }
+        @keyframes fall {
+            0% { top: -90px; transform: rotate(0deg); }
+            100% { top: 100vh; transform: rotate(360deg); }
+        }
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            z-index: 200 !important;
+        }
+        .game-over h2 {
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 2em;
+        }
+        .game-over p {
+            font-family: var(--font-family);
+            color: var(--primary-color);
+            font-size: 1.2em;
+            margin: 0;
+        }
+        .game-over-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            background: rgba(255, 0, 0, 0.2);
+            color: var(--primary-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .game-over-button:hover {
+            transform: scale(1.05);
+            background: rgba(255, 0, 0, 0.4);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+        #home-screen {
+            background: url('sky2.png') center/cover fixed;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .home-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .home-buttons img {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(2px 2px 4px rgba(255, 255, 255, 0.5));
+        }
+        .home-buttons img:hover { transform: scale(1.1); }
+        #musics-screen {
+            background: url('sky.png') center/cover fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            color: var(--primary-color);
+        }
+        #musics-screen h2 {
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            font-size: 2em;
+        }
+        .home-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+        }
+        .home-button:hover {
+            transform: scale(1.1);
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            border-color: var(--primary-color);
+        }
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+            z-index: 50;
+        }
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: #fff;
+            color: var(--primary-color);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow: auto;
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary-color);
+        }
+        .modal-content h2 {
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: 15px;
+        }
+        .modal-content img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .modal-content p {
+            font-family: var(--font-family);
+            line-height: 1.5;
+        }
+        .modal-content button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: var(--primary-color);
+            color: #fff;
+            font-family: var(--font-family);
+            font-weight: var(--font-weight-bold);
+            transition: all 0.3s ease;
+        }
+        .modal-content button:hover {
+            background: #ff3333;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        @media (max-width:768px) {
+            .title-container { margin-bottom: 30px; }
+            .title-image { max-width: 60%; }
+            .play-button { font-size: 1.5em; padding: 15px 30px; }
+            .home-buttons img { width: 80px; height: 80px; }
+            .home-buttons { gap: 15px; }
+            .home-button { font-size: 1em; padding: 12px 24px; }
+            .character { width: 150px; }
+            .left-character { bottom: 10px; left: 10px; }
+            .right-character { top: 10px; right: 10px; }
+            .sound-button { width: 50px; height: 50px; top: 10px; right: 10px; background-size: cover; }
+            .game-header { font-size: 1.2em; flex-direction: column; gap: 10px; }
+            .game-area { 
+        width: 100vw; 
+        height: 100vh; 
+    }
+            .game-star { width: 100px; height: 70px; }
+            .game-over { padding: 30px; gap: 10px; }
+            .game-over h2 { font-size: 1.5em; }
+        .game-over p { font-size: 1em; }
+        .game-over-button { font-size: 1em; padding: 12px; }
+        }
+            .modal-content { padding: 20px; max-width: 90%; max-height: 90%; }
+            #musics-screen h2 { font-size: 1.5em; }
+
+        .pic-modal-content {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            max-width: none !important;
+            overflow: hidden !important;
+        }
+        .pic-modal-img {
+            width: 1200px;
+            height: 630px;
+            object-fit: contain;
+            aspect-ratio: 16/9;
+            border: none !important;
+            margin: 0 !important;
+            display: block;
+            background: transparent !important;
+        }
+        .text-modal-content {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            position: relative;
+            min-width: 1200px;
+            min-height: 630px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Garante que o botão X fique igual em todos os modais */
+        .close-x-btn {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: transparent !important;
+            color: #ff3333 !important;
+            border: none !important;
+            font-size: 3em !important;         /* aumenta o tamanho */
+            font-family: var(--font-family) !important;
+            font-weight: var(--font-weight-bold) !important;
+            cursor: pointer;
+            z-index: 102;
+            transition: color 0.2s;
+            box-shadow: none !important;
+            outline: none !important;
+            line-height: 0.7 !important;       /* deixa menos longa */
+            letter-spacing: -0.1em !important; /* deixa menos longa */
+            text-shadow: 0 0 2px #ff3333, 0 0 6px #fff; /* deixa mais grossa visualmente */
+        }
+
+        #picModal .close-x-btn {
+            position: absolute;
+            top: 60px;
+            left: 125px;
+            background: transparent !important;
+            color: #ff3333 !important;
+            border: none !important;
+            font-size: 3em !important;         /* aumenta o tamanho */
+            font-family: var(--font-family) !important;
+            font-weight: var(--font-weight-bold) !important;
+            cursor: pointer;
+            z-index: 102;
+            transition: color 0.2s;
+            box-shadow: none !important;
+            outline: none !important;
+            line-height: 0.7 !important;       /* deixa menos longa */
+            letter-spacing: -0.1em !important; /* deixa menos longa */
+            text-shadow: 0 0 2px #ff3333, 0 0 6px #fff; /* deixa mais grossa visualmente */
+        }
+
+        #musics-screen .close-x-btn {
+            position: absolute;
+            top: 90px;   /* desce o X */
+            left: 150px;
+            background: transparent !important;
+            color: #ff3333 !important;
+            border: none !important;
+            font-size: 3em !important;
+            font-family: var(--font-family) !important;
+            font-weight: var(--font-weight-bold) !important;
+            cursor: pointer;
+            z-index: 102;
+            transition: color 0.2s;
+            box-shadow: none !important;
+            outline: none !important;
+            line-height: 0.7 !important;
+            letter-spacing: -0.1em !important;
+            text-shadow: 0 0 2px #ff3333, 0 0 6px #fff;
+        }
+        #game-screen .close-x-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    background: transparent !important;
+    color: #ff3333 !important;
+    border: none !important;
+    font-size: 3em !important;
+    font-family: var(--font-family) !important;
+    font-weight: var(--font-weight-bold) !important;
+    cursor: pointer;
+    z-index: 102;
+    transition: color 0.2s;
+    box-shadow: none !important;
+    outline: none !important;
+    line-height: 0.7 !important;
+    letter-spacing: -0.1em !important;
+    text-shadow: 0 0 2px #ff3333, 0 0 6px #fff;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+        /* Remove borda e fundo do modal do carrossel */
+        #textModal .modal-content,
+        #textModal .text-modal-content {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            position: relative;
+        }
+        #loveCarousel {
+            width: 1000px;
+            height: 630px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: transparent !important;
+            border: none !important;
+        }
+        #loveImg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: transparent !important;
+            border: none !important;
+        }
+        .arrow-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent !important;
+            color: #ff3333 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            font-size: 3em !important; /* igual ao X */
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            font-family: var(--font-family) !important;
+            font-weight: var(--font-weight-bold) !important;
+            box-shadow: none !important;
+            z-index: 101;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0.7 !important;
+            letter-spacing: -0.1em !important;
+            text-shadow: 0 0 2px #ff3333, 0 0 6px #fff;
+        }
+        .arrow-btn:hover {
+            color: #ff0000 !important;
+            background: transparent !important;
+        }
+        #prevLove {
+            left: 0;
+        }
+        #nextLove {
+            right: 0;
+        }
+        .musics-buttons-grid {
+            display: flex;
+            justify-content: center;
+            gap: 80px; /* espaço uniforme entre colunas */
+            margin-bottom: 30px;
+            padding: 0 60px; /* espaço lateral extra */
+        }
+        .music-col {
+            display: flex;
+            flex-direction: column;
+            gap: 50px; /* espaço uniforme entre linhas */
+        }
+        .music-row {
+            display: flex;
+            align-items: center;
+            gap: 40px; /* espaço uniforme entre botão e imagem */
+            gap: 80px; /* aumenta o espaço entre botão e imagem */
+        }
+        .music-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: url('sound-on.png') center/cover no-repeat, rgba(255,0,0,0.15);
+            border: none !important;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: none !important;
+            margin: 0;
+        }
+        .music-btn.muted {
+            background: url('sound-off.png') center/cover no-repeat, rgba(139,0,0,0.2);
+            animation: none;
+        }
+        .music-btn:hover {
+            transform: scale(1.1) rotate(10deg);
+        }
+        .music-img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border: none !important;
+            margin: 0;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        #game-screen .close-x-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: transparent !important;
+            color: #ff3333 !important;
+            border: none !important;
+            font-size: 3em !important;
+            font-family: var(--font-family) !important;
+            font-weight: var(--font-weight-bold) !important;
+            cursor: pointer;
+            z-index: 102;
+            transition: color 0.2s;
+            box-shadow: none !important;
+            outline: none !important;
+            line-height: 0.7 !important;
+            letter-spacing: -0.1em !important;
+            text-shadow: 0 0 2px #ff3333, 0 0 6px #fff;
+            padding: 0 !important;
+        }
+
+        /* Remove o fundo embaçado do carrossel e da tela pic */
+.pic-modal-content,
+.text-modal-content,
+#textModal .modal-content,
+#picModal .modal-content {
+    backdrop-filter: none !important;
+}
+    </style>
+</head>
+<body>
+    <img src="bubblegum.png" alt="Bubblegum" class="character left-character">
+    <img src="marceline.png" alt="Marceline" class="character right-character">
+
+    <button class="sound-button" id="soundButton"></button>
+
+    <audio id="bgAudio" loop preload="auto">
+        <source src="background.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Tela Inicial (Menu) -->
+    <div id="menu-screen" class="screen">
+        <div class="title-container">
+            <img src="eskar.png" alt="es.kar" class="title-image">
+        </div>
+        <button class="play-button" id="playButton">PLAY</button>
+        <button class="play-button" id="homeButton">HOME</button>
+    </div>
+
+    <!-- Tela do Jogo -->
+    <div id="game-screen" class="screen hidden">
+        <button class="close-x-btn" id="closeGameScreen">&#10006;</button>
+        <div class="game-header">
+            <h2 id="score"></h2>
+            <h3 id="timer"></h3>
+        </div>
+        <div class="game-area" id="gameArea"></div>
+        <div id="gameOver" class="game-over hidden">
+            <h2>Game over!</h2>
+            <p id="finalScore">score: 0</p>
+            <button class="game-over-button" id="resumeButton">Resume</button>
+            <button class="game-over-button" id="quitButton">Quit</button>
+        </div>
+    </div>
+
+    <!-- TELA HOME -->
+    <div id="home-screen" class="hidden">
+        <div class="home-buttons">
+            <img src="pic.png" alt="PIC" id="picButton">
+            <img src="musics.png" alt="MUSICS" id="musicsButton">
+            <img src="text.png" alt="TEXT" id="textButton">
+            <img src="menu.png" alt="MENU" id="menuButton">
+        </div>
+    </div>
+
+    <!-- TELA MUSICS -->
+    <div id="musics-screen" class="hidden">
+        <button class="close-x-btn" id="closeMusicsScreen">&#10006;</button>
+        <div class="musics-buttons-grid">
+            <div class="music-col">
+                <div class="music-row">
+                    <button class="music-btn" data-src="1.mp3" data-img="1.png"></button>
+                    <img src="1.png" alt="1" class="music-img">
+                </div>
+                <div class="music-row">
+                    <button class="music-btn" data-src="2.mp3" data-img="2.png"></button>
+                    <img src="2.png" alt="2" class="music-img">
+                </div>
+            </div>
+            <div class="music-col">
+                <div class="music-row">
+                    <button class="music-btn" data-src="3.mp3" data-img="3.png"></button>
+                    <img src="3.png" alt="3" class="music-img">
+                </div>
+                <div class="music-row">
+                    <button class="music-btn" data-src="4.mp3" data-img="4.png"></button>
+                    <img src="4.png" alt="4" class="music-img">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PIC -->
+    <div id="picModal" class="modal">
+        <div class="modal-content pic-modal-content">
+            <button class="close-x-btn" id="closePicModal">&#10006;</button>
+            <img src="picModalImage.png" alt="Imagem do Modal PIC" class="pic-modal-img">
+        </div>
+    </div>
+
+    <!-- MODAL TEXT (Carrossel de imagens) -->
+    <div id="textModal" class="modal">
+        <div class="modal-content text-modal-content">
+            <button class="close-x-btn" id="closeTextModal">&#10006;</button>
+            <button id="prevLove" class="arrow-btn">&#8592;</button>
+            <div id="loveCarousel">
+                <img id="loveImg" src="love1.png" alt="Love">
+            </div>
+            <button id="nextLove" class="arrow-btn">&#8594;</button>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let score = 0, timeLeft = 60, gameActive = false, gameTimer, starInterval, audioContext, isMuted = false;
+        let musicAudio = null;
+        const playButton = document.getElementById('playButton'),
+              homeButton = document.getElementById('homeButton'),
+              menuScreen = document.getElementById('menu-screen'),
+              homeScreen = document.getElementById('home-screen'),
+              musicsScreen = document.getElementById('musics-screen'),
+              gameScreen = document.getElementById('game-screen'),
+              gameArea = document.getElementById('gameArea'),
+              scoreEl = document.getElementById('score'),
+              timerEl = document.getElementById('timer'),
+              gameOverEl = document.getElementById('gameOver'),
+              finalScoreEl = document.getElementById('finalScore'),
+              resumeButton = document.getElementById('resumeButton'),
+              quitButton = document.getElementById('quitButton'),
+              soundButton = document.getElementById('soundButton'),
+              bgAudio = document.getElementById('bgAudio'),
+              characters = document.querySelectorAll('.character'),
+              picButton = document.getElementById('picButton'),
+              musicsButton = document.getElementById('musicsButton'),
+              textButton = document.getElementById('textButton'),
+              menuButton = document.getElementById('menuButton'),
+              closeGameScreen = document.getElementById('closeGameScreen');
+
+        window.addEventListener('load', () => {
+            bgAudio.volume = 0.3;
+            bgAudio.play().catch(() => {});
+        });
+
+        function playSound(frequency = 800, duration = 200) {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator(), gainNode = audioContext.createGain();
+            oscillator.connect(gainNode); gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency; oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            oscillator.start(audioContext.currentTime); oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        soundButton.addEventListener('click', () => {
+            isMuted = !isMuted;
+            soundButton.classList.toggle('muted', isMuted);
+            if (isMuted) {
+                bgAudio.pause();
+                audioContext?.suspend();
+            } else {
+                bgAudio.play();
+                audioContext?.resume();
+            }
+        });
+
+        function startGame() {
+            menuScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            characters.forEach(c => c.style.display = 'none');
+            score = 0; timeLeft = 60; gameActive = true;
+            updateScore(); updateTimer();
+            gameOverEl.classList.add('hidden');
+            closeGameScreen.style.display = 'block'; // Mostra o X
+            gameTimer = setInterval(() => { timeLeft--; updateTimer(); if (timeLeft <= 0) endGame(); }, 1000);
+            starInterval = setInterval(createStar, 800);
+        }
+
+        function createStar() {
+            if (!gameActive) return;
+            const star = document.createElement('div');
+            star.classList.add('game-star');
+            star.style.left = Math.random() * (window.innerWidth - 90) + 'px';
+            star.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            star.addEventListener('click', () => {
+                if (gameActive) {
+                    score += 10;
+                    updateScore();
+                    star.remove();
+                    if (!isMuted) playSound(1000, 150);
+                }
+            });
+            gameArea.appendChild(star);
+            setTimeout(() => star.parentNode && star.remove(), 8000);
+        }
+
+        function updateScore() { scoreEl.textContent = `${score}`; }
+        function updateTimer() { timerEl.textContent = `${timeLeft}s`; }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameTimer); clearInterval(starInterval);
+            document.querySelectorAll('.game-star').forEach(star => star.remove());
+            finalScoreEl.textContent = `score: ${score}`;
+            gameOverEl.classList.remove('hidden');
+            closeGameScreen.style.display = 'none'; // Esconde o X
+            if (!isMuted) playSound(400, 500);
+        }
+
+        function resetGameState() {
+    score = 0;
+    timeLeft = 60;
+    clearInterval(gameTimer);
+    clearInterval(starInterval);
+    document.querySelectorAll('.game-star').forEach(star => star.remove());
+}
+
+        // Resume e Quit SEM duplicidade
+        resumeButton.onclick = function() {
+    // Funciona igual ao Play
+    gameOverEl.classList.add('hidden');
+    resetGameState();
+    startGame();
+};
+
+quitButton.onclick = function() {
+    // Funciona igual ao X
+    gameActive = false;
+    gameOverEl.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    menuScreen.classList.remove('hidden');
+    characters.forEach(c => c.style.display = 'block');
+    document.body.style.backgroundImage = "url('sky.png')";
+    resetGameState();
+    closeGameScreen.style.display = 'block';
+};
+
+        // HOME e navegação
+        homeButton.addEventListener('click', () => {
+            menuScreen.classList.add('hidden');
+            homeScreen.classList.remove('hidden');
+            document.body.style.backgroundImage = "url('sky2.png')";
+            characters.forEach(c => c.style.display = 'none');
+        });
+
+        picButton.addEventListener('click', () => openModal('picModal'));
+        textButton.addEventListener('click', () => openModal('textModal'));
+
+        musicsButton.addEventListener('click', () => {
+            homeScreen.classList.add('hidden');
+            musicsScreen.classList.remove('hidden');
+            characters.forEach(c => c.style.display = 'none');
+        });
+
+        menuButton.addEventListener('click', () => {
+            homeScreen.classList.add('hidden');
+            menuScreen.classList.remove('hidden');
+            document.body.style.backgroundImage = "url('sky.png')";
+            characters.forEach(c => c.style.display = 'block');
+        });
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        document.addEventListener('visibilitychange', () => { if (document.hidden && gameActive) gameActive = false; });
+
+        // MUSICS buttons logic
+        document.querySelectorAll('.music-btn').forEach(btn => {
+            btn.classList.add('muted');
+            btn.classList.remove('active');
+            btn.style.animation = "none";
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('active')) {
+                    btn.classList.remove('active');
+                    btn.classList.add('muted');
+                    btn.style.animation = "none";
+                    if (musicAudio) {
+                        musicAudio.pause();
+                        musicAudio.currentTime = 0;
+                    }
+                    return;
+                }
+                document.querySelectorAll('.music-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.classList.add('muted');
+                    b.style.animation = "none";
+                });
+                btn.classList.add('active');
+                btn.classList.remove('muted');
+                btn.style.animation = "rotate 20s linear infinite";
+                const src = btn.getAttribute('data-src');
+                if (musicAudio) {
+                    musicAudio.pause();
+                    musicAudio.currentTime = 0;
+                }
+                musicAudio = new Audio(src);
+                musicAudio.volume = 0.7;
+                musicAudio.play();
+                musicAudio.onended = () => {
+                    btn.classList.remove('active');
+                    btn.classList.add('muted');
+                    btn.style.animation = "none";
+                };
+            });
+        });
+
+        // Carrossel de imagens no modal de texto
+        let currentImageIndex = 0;
+        const images = ['love1.png', 'love2.png', 'love3.png', 'love4.png', 'love5.png'];
+        const loveImg = document.getElementById('loveImg');
+
+        function updateImage() {
+            loveImg.src = images[currentImageIndex];
+        }
+
+        document.getElementById('nextLove').addEventListener('click', () => {
+            if (currentImageIndex < images.length - 1) {
+                currentImageIndex++;
+                updateImage();
+            }
+        });
+
+        document.getElementById('prevLove').addEventListener('click', () => {
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                updateImage();
+            }
+        });
+
+        document.getElementById('closeTextModal').addEventListener('click', () => {
+            closeModal('textModal');
+            homeScreen.classList.remove('hidden');
+            menuScreen.classList.add('hidden');
+            musicsScreen.classList.add('hidden');
+            gameScreen.classList.add('hidden');
+            characters.forEach(c => c.style.display = 'none');
+            document.body.style.backgroundImage = "url('sky2.png')";
+        });
+
+        document.getElementById('closePicModal').addEventListener('click', () => {
+            closeModal('picModal');
+            homeScreen.classList.remove('hidden');
+            menuScreen.classList.add('hidden');
+            musicsScreen.classList.add('hidden');
+            gameScreen.classList.add('hidden');
+            characters.forEach(c => c.style.display = 'none');
+            document.body.style.backgroundImage = "url('sky2.png')";
+        });
+
+        document.getElementById('closeMusicsScreen').addEventListener('click', () => {
+            musicsScreen.classList.add('hidden');
+            homeScreen.classList.remove('hidden');
+            menuScreen.classList.add('hidden');
+            document.body.style.backgroundImage = "url('sky2.png')";
+            characters.forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.music-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('muted');
+                b.style.animation = "none";
+            });
+            if (musicAudio) {
+                musicAudio.pause();
+                musicAudio.currentTime = 0;
+            }
+        });
+
+        closeGameScreen.addEventListener('click', () => {
+            gameOverEl.classList.add('hidden');
+            gameScreen.classList.add('hidden');
+            menuScreen.classList.remove('hidden');
+            characters.forEach(c => c.style.display = 'block');
+            document.body.style.backgroundImage = "url('sky.png')";
+            score = 0;
+            timeLeft = 60;
+            clearInterval(gameTimer);
+            clearInterval(starInterval);
+            document.querySelectorAll('.game-star').forEach(star => star.remove());
+            closeGameScreen.style.display = 'block';
+        });
+
+        playButton.addEventListener('click', () => {
+            startGame();
+        });
+    </script>
+</body>
+</html>
