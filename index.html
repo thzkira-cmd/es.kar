@@ -625,82 +625,90 @@
     backdrop-filter: none !important;
 }
 
-// ...existing code...
-        /* === Mobile específico (versão móvel) ===
-           Mantém o HTML/JS existente e aplica layout otimizado para telas <= 420px */
-        @media (max-width:420px) {
-            /* layout geral */
-            body { background-size: cover; }
-            .screen { width:100%; max-width:420px; padding:14px; }
-            .character { width:120px; }
-            .left-character { bottom:8px; left:8px; }
-            .right-character { top:8px; right:8px; }
+/* === Versão mobile para todas as telas (<=420px) === */
+@media (max-width:420px) {
+    /* corpo e container */
+    html, body { height:100%; min-height:100%; overflow:auto !important; }
+    body { background-size: cover; display:block; padding:0; margin:0; }
+    .screen { width:100%; max-width:420px; margin:0 auto; padding:12px; box-sizing:border-box; }
 
-            /* botões e cabeçalho */
-            .sound-button {
-                top:12px; right:12px;
-                width:54px; height:54px;
-                border-radius:50%;
-                background-size: cover;
-            }
-            .title-image { width:86%; max-width:320px; margin:0 auto; display:block; }
-            .play-button {
-                display:block; width:100%;
-                padding:14px 10px; font-size:1.4rem; border-radius:12px;
-            }
+    /* personagens */
+    .character { display:none !important; }
 
-            /* home */
-            .home-buttons { gap:8px; padding:6px; }
-            .home-buttons img { width:86px; height:86px; border-radius:12px; }
+    /* botão som */
+    .sound-button {
+        position: fixed; top:10px; right:10px;
+        width:54px; height:54px; border-radius:50%;
+        background-size: cover; z-index:40;
+        backdrop-filter: none;
+    }
+    .sound-button.muted { background-size: cover; }
 
-            /* game */
-            #game-screen { padding-top:72px; height:100vh; }
-            .game-header { display:flex; justify-content:space-between; align-items:center; padding:0 8px; font-size:1.1rem; gap:8px; }
-            #score, #timer { min-width:70px; text-align:center; }
+    /* menu / título / play */
+    .title-container { margin:12px 0; }
+    .title-image { width:86%; max-width:320px; display:block; margin:0 auto; }
+    .play-button, .home-button {
+        width:100%; padding:14px; font-size:1.4rem; border-radius:12px;
+        display:block; margin:8px 0;
+    }
 
-            .game-area { position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:15; overflow:hidden; }
-            .game-star {
-                width:110px; height:96px;
-                background: url('star.png') center/contain no-repeat;
-                animation: fall 8s linear forwards;
-            }
-            @keyframes fall {
-                0% { top: -140px; transform: rotate(0deg); }
-                100% { top: 110vh; transform: rotate(360deg); }
-            }
-            .game-over { width:92%; max-width:360px; padding:18px; border-radius:14px; }
+    /* home */
+    #home-screen, #menu-screen { height: auto; min-height:100vh; padding-top:64px; }
+    .home-buttons { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; padding:8px; }
+    .home-buttons img { width:86px; height:86px; border-radius:12px; object-fit:cover; }
 
-            /* musics - layout empilhado e imagens maiores ao lado do botão (touch-friendly) */
-            .musics-buttons-grid {
-                display:flex; flex-direction:column; gap:18px; padding:8px; align-items:center;
-            }
-            .music-col { width:100%; display:flex; flex-direction:column; gap:12px; align-items:center; }
-            .music-row {
-                width:92%; display:flex; flex-direction:row; align-items:center; justify-content:space-between;
-                gap:12px; padding:8px; border-radius:12px; background: rgba(255,255,255,0.02);
-            }
-            .music-btn {
-                width:84px; height:84px; border-radius:50%;
-                background-size: cover;
-                flex-shrink:0;
-            }
-            .music-img { width:120px; height:84px; object-fit:cover; border-radius:8px; box-shadow:0 6px 12px rgba(0,0,0,0.18); }
+    /* musics */
+    #musics-screen { padding-top:72px; min-height:100vh; align-items:center; justify-content:flex-start; }
+    .musics-buttons-grid { width:100%; display:flex; flex-direction:column; gap:14px; padding:12px; box-sizing:border-box; }
+    .music-col { width:100%; display:flex; flex-direction:column; gap:12px; align-items:center; }
+    .music-row {
+        width:94%; display:flex; align-items:center; justify-content:space-between; gap:12px;
+        padding:8px; border-radius:12px; background: rgba(255,255,255,0.02);
+    }
+    .music-btn {
+        width:84px; height:84px; border-radius:50%; flex-shrink:0;
+        background-size: cover; box-shadow:none;
+    }
+    .music-img { width:120px; height:84px; object-fit:cover; border-radius:8px; box-shadow:0 6px 12px rgba(0,0,0,0.18); }
 
-            /* modais adaptados */
-            .modal-content { padding:14px; max-width:94%; max-height:88vh; overflow:auto; border-radius:12px; }
-            .pic-modal-img { width:100%; height:auto; object-fit:contain; }
-            #loveCarousel { width:100%; height:60vh; display:flex; align-items:center; justify-content:center; }
-            #loveImg { width:100%; height:100%; object-fit:contain; }
+    /* game */
+    #game-screen { padding-top:72px; min-height:100vh; }
+    .game-header { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 8px; font-size:1.1rem; }
+    #score, #timer { min-width:70px; text-align:center; font-size:1.1rem; }
+    .game-area { position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:20; overflow:hidden; }
+    .game-star {
+        width:110px; height:96px; background: url('star.png') center/contain no-repeat;
+        background-color: transparent; clip-path:none; animation: fall 7s linear forwards;
+    }
+    @keyframes fall {
+        0% { top: -140px; transform: rotate(0deg); }
+        100% { top: 110vh; transform: rotate(360deg); }
+    }
+    .close-x-btn { position: fixed; top:8px; left:8px; font-size:2.2rem !important; padding:6px; z-index:55; }
 
-            /* botões X / setas menores para mobile */
-            .close-x-btn { top:8px; left:8px; font-size:2.2rem !important; padding:6px; }
-            .arrow-btn { font-size:1.8rem !important; width:44px; height:44px; }
+    /* game-over */
+    .game-over { position: fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:92%; max-width:360px; padding:18px; border-radius:14px; z-index:60; }
 
-            /* garante que elementos grandes do desktop não quebrem layout mobile */
-            .title-container, .musics-buttons-grid, .text-modal-content, .pic-modal-content { padding-left:8px; padding-right:8px; }
-        }
- // ...existing code...
+    /* modais (PIC / TEXT) */
+    .modal { padding:0 8px; }
+    .modal-content { width:100%; max-width:100%; padding:14px; border-radius:12px; max-height:88vh; overflow:auto; }
+    .pic-modal-content { padding:8px; background:transparent !important; border:none !important; box-shadow:none !important; }
+    .pic-modal-img { width:100%; height:auto; object-fit:contain; border-radius:10px; }
+    .text-modal-content { padding:0; background:transparent !important; border:none !important; box-shadow:none !important; }
+    #loveCarousel { width:100%; height:60vh; display:flex; align-items:center; justify-content:center; }
+    #loveImg { width:100%; height:100%; object-fit:contain; }
 
+    /* setas e controles */
+    .arrow-btn { font-size:1.8rem !important; width:44px; height:44px; }
+    .close-x-btn, .arrow-btn { background:transparent !important; color:#ff3333 !important; }
+
+    /* evita regras grandes do desktop */
+    .title-container, .musics-buttons-grid, .text-modal-content, .pic-modal-content { padding-left:8px; padding-right:8px; box-sizing:border-box; }
+
+    /* acessibilidade / toque */
+    button, .music-btn, .home-buttons img { -webkit-tap-highlight-color: rgba(0,0,0,0.0); }
+
+}
     </style>
 </head>
 <body>
