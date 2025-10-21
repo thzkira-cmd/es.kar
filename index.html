@@ -164,10 +164,11 @@
         }
         .game-star {
             position: absolute;
-            width: 100px;
-            height: 90px;
-            background: #ffd700 url('star.png') center/cover;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            width: 160px;
+            height: 140px;
+            background: url('star.png') center/contain no-repeat; /* somente a imagem */
+            background-color: transparent; /* remove qualquer cor de fundo */
+            clip-path: none; /* remove recorte, mostra imagem inteira */
             opacity: 1;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -175,7 +176,7 @@
             animation: fall 10s linear forwards;
             pointer-events: auto;
         }
-        .game-star:hover { transform: scale(1.2); }
+        .game-star:hover { transform: scale(1.15); } /* ligeiro aumento no hover */
         @keyframes fall {
             0% { top: -90px; transform: rotate(0deg); }
             100% { top: 100vh; transform: rotate(360deg); }
@@ -360,11 +361,14 @@
         width: 100vw; 
         height: 100vh; 
     }
-            .game-star { width: 100px; height: 70px; }
+            .game-star { width: 120px; height: 100px; } /* tamanho menor no mobile */
             .game-over { padding: 30px; gap: 10px; }
             .game-over h2 { font-size: 1.5em; }
         .game-over p { font-size: 1em; }
         .game-over-button { font-size: 1em; padding: 12px; }
+
+            /* ajusta tamanho das fotos/ícones de música no mobile */
+            .music-btn, .music-img { width: 110px; height: 110px; border-radius: 12px; }
         }
             .modal-content { padding: 20px; max-width: 90%; max-height: 90%; }
             #musics-screen h2 { font-size: 1.5em; }
@@ -564,8 +568,8 @@
             gap: 80px; /* aumenta o espaço entre botão e imagem */
         }
         .music-btn {
-            width: 120px;
-            height: 120px;
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
             background: url('sound-on.png') center/cover no-repeat, rgba(255,0,0,0.15);
             border: none !important;
@@ -579,16 +583,16 @@
             animation: none;
         }
         .music-btn:hover {
-            transform: scale(1.1) rotate(10deg);
+            transform: scale(1.05) rotate(6deg);
         }
         .music-img {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-            border: none !important;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 14px;
             margin: 0;
             background: transparent !important;
-            box-shadow: none !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         }
         #game-screen .close-x-btn {
             position: fixed;
@@ -620,6 +624,83 @@
 #picModal .modal-content {
     backdrop-filter: none !important;
 }
+
+// ...existing code...
+        /* === Mobile específico (versão móvel) ===
+           Mantém o HTML/JS existente e aplica layout otimizado para telas <= 420px */
+        @media (max-width:420px) {
+            /* layout geral */
+            body { background-size: cover; }
+            .screen { width:100%; max-width:420px; padding:14px; }
+            .character { width:120px; }
+            .left-character { bottom:8px; left:8px; }
+            .right-character { top:8px; right:8px; }
+
+            /* botões e cabeçalho */
+            .sound-button {
+                top:12px; right:12px;
+                width:54px; height:54px;
+                border-radius:50%;
+                background-size: cover;
+            }
+            .title-image { width:86%; max-width:320px; margin:0 auto; display:block; }
+            .play-button {
+                display:block; width:100%;
+                padding:14px 10px; font-size:1.4rem; border-radius:12px;
+            }
+
+            /* home */
+            .home-buttons { gap:8px; padding:6px; }
+            .home-buttons img { width:86px; height:86px; border-radius:12px; }
+
+            /* game */
+            #game-screen { padding-top:72px; height:100vh; }
+            .game-header { display:flex; justify-content:space-between; align-items:center; padding:0 8px; font-size:1.1rem; gap:8px; }
+            #score, #timer { min-width:70px; text-align:center; }
+
+            .game-area { position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:15; overflow:hidden; }
+            .game-star {
+                width:110px; height:96px;
+                background: url('star.png') center/contain no-repeat;
+                animation: fall 8s linear forwards;
+            }
+            @keyframes fall {
+                0% { top: -140px; transform: rotate(0deg); }
+                100% { top: 110vh; transform: rotate(360deg); }
+            }
+            .game-over { width:92%; max-width:360px; padding:18px; border-radius:14px; }
+
+            /* musics - layout empilhado e imagens maiores ao lado do botão (touch-friendly) */
+            .musics-buttons-grid {
+                display:flex; flex-direction:column; gap:18px; padding:8px; align-items:center;
+            }
+            .music-col { width:100%; display:flex; flex-direction:column; gap:12px; align-items:center; }
+            .music-row {
+                width:92%; display:flex; flex-direction:row; align-items:center; justify-content:space-between;
+                gap:12px; padding:8px; border-radius:12px; background: rgba(255,255,255,0.02);
+            }
+            .music-btn {
+                width:84px; height:84px; border-radius:50%;
+                background-size: cover;
+                flex-shrink:0;
+            }
+            .music-img { width:120px; height:84px; object-fit:cover; border-radius:8px; box-shadow:0 6px 12px rgba(0,0,0,0.18); }
+
+            /* modais adaptados */
+            .modal-content { padding:14px; max-width:94%; max-height:88vh; overflow:auto; border-radius:12px; }
+            .pic-modal-img { width:100%; height:auto; object-fit:contain; }
+            #loveCarousel { width:100%; height:60vh; display:flex; align-items:center; justify-content:center; }
+            #loveImg { width:100%; height:100%; object-fit:contain; }
+
+            /* botões X / setas menores para mobile */
+            .close-x-btn { top:8px; left:8px; font-size:2.2rem !important; padding:6px; }
+            .arrow-btn { font-size:1.8rem !important; width:44px; height:44px; }
+
+            /* garante que elementos grandes do desktop não quebrem layout mobile */
+            .title-container, .musics-buttons-grid, .text-modal-content, .pic-modal-content { padding-left:8px; padding-right:8px; }
+        }
+ // ...existing code...
+
     </style>
 </head>
 <body>
@@ -783,7 +864,9 @@
             if (!gameActive) return;
             const star = document.createElement('div');
             star.classList.add('game-star');
-            star.style.left = Math.random() * (window.innerWidth - 90) + 'px';
+            // usa largura aproximada da estrela para não posicionar fora da tela
+            const starWidth = 160;
+            star.style.left = Math.random() * Math.max(0, window.innerWidth - starWidth) + 'px';
             star.style.animationDuration = (Math.random() * 3 + 5) + 's';
             star.addEventListener('click', () => {
                 if (gameActive) {
